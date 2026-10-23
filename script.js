@@ -11,8 +11,9 @@ const LEAD_ENDPOINT = 'https://lead-relay.leestygpt.workers.dev/lead/6YBHFGY8AD'
   const burger = document.getElementById('burger');
   const nav = document.getElementById('nav');
   burger?.addEventListener('click', () => {
-    burger.classList.toggle('is-open');
-    nav.classList.toggle('is-open');
+    const open = burger.classList.toggle('is-open');
+    nav.classList.toggle('is-open', open);
+    burger.setAttribute('aria-expanded', open);
   });
   nav?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
     burger.classList.remove('is-open');
@@ -43,7 +44,7 @@ const LEAD_ENDPOINT = 'https://lead-relay.leestygpt.workers.dev/lead/6YBHFGY8AD'
         body: JSON.stringify(payload),
       });
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      btn.textContent = 'Заявка отправлена ✓';
+      btn.textContent = 'Заявка отправлена';
       form.reset();
     } catch (err) {
       console.error(err);
@@ -65,10 +66,38 @@ const LEAD_ENDPOINT = 'https://lead-relay.leestygpt.workers.dev/lead/6YBHFGY8AD'
     });
   });
 
-  const targets = document.querySelectorAll('.adv, .srv, .step, .kit, .faq__item, .form, .hero__card, .contact-card');
-  targets.forEach(el => el.classList.add('reveal'));
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduce) {
+    const drift = document.querySelectorAll('.hero__photo, .gallery img');
+    let ticking = false;
+    const update = () => {
+      const vh = window.innerHeight;
+      drift.forEach(el => {
+        const r = el.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > vh) return;
+        const k = (r.top + r.height / 2 - vh / 2) / vh;
+        el.style.translate = '0 ' + (k * -18).toFixed(1) + 'px';
+      });
+      ticking = false;
+    };
+    window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    update();
+  }
+
+  document.documentElement.classList.add('js');
+  const groups = ['.split__head > *', '.section__title, .section__sub', '.why li', '.srv', '.note--wide', '.gallery figure', '.price-group', '.step', '.faq__item', '.contact__info > *', '.form'];
+  const scrollDriven = window.CSS && CSS.supports('animation-timeline', 'view()');
+  const targets = new Set();
+  groups.forEach(sel => document.querySelectorAll(sel).forEach((el, i) => {
+    if (targets.has(el)) return;
+    el.classList.add(scrollDriven ? 'sd' : 'reveal');
+    el.style.setProperty('--d', Math.min(i, 6) * 70 + 'ms');
+    targets.add(el);
+  }));
+  if (scrollDriven) return;
   const io = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
   targets.forEach(el => io.observe(el));
 })();
