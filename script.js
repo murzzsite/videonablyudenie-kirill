@@ -86,7 +86,7 @@ const LEAD_ENDPOINT = 'https://lead-relay.leestygpt.workers.dev/lead/6YBHFGY8AD'
   }
 
   document.documentElement.classList.add('js');
-  const groups = ['.split__head > *', '.section__title, .section__sub', '.why li', '.srv', '.note--wide', '.gallery figure', '.price-group', '.step', '.faq__item', '.contact__info > *', '.form'];
+  const groups = ['.split__head > *', '.section__title, .section__sub', '.why li', '.srv', '.note--wide', '.gallery figure', '.price-group', '.step', '.kit', '.faq__item', '.contact__info > *', '.form'];
   const scrollDriven = window.CSS && CSS.supports('animation-timeline', 'view()');
   const targets = new Set();
   groups.forEach(sel => document.querySelectorAll(sel).forEach((el, i) => {
